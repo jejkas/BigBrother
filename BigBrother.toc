@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: Big Brother spy addon.
+## Notes: "Let us spy on you"
+## Author: rexas - rexas.net/wow
+## Version: 1.0
+BigBrother.lua
+BigBrother.xml
