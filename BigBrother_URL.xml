@@ -1,0 +1,78 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+	..\FrameXML\UI.xsd">
+	
+   <Frame name="BigBrother_URL_frame" toplevel="true" enableMouse="true" hidden="true">
+     <Size>
+       <AbsDimension x="550" y="100" />
+     </Size>
+     <Anchors>
+       <Anchor point="CENTER" />
+     </Anchors>
+     <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
+           edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+       <BackgroundInsets>
+         <AbsInset left="11" right="12" top="12" bottom="11"/>
+       </BackgroundInsets>
+       <TileSize>
+         <AbsValue val="32"/>
+       </TileSize>
+       <EdgeSize>
+         <AbsValue val="32"/>
+       </EdgeSize>
+     </Backdrop>
+	 
+	 
+	 <Frames>
+		<!--
+		<Button name="BigBrother_frame_run" inherits="GameMenuButtonTemplate" text="Run">
+			<Anchors>
+				<Anchor point="CENTER" relativePoint="BOTTOM">
+					<Offset>
+						<AbsDimension x="0" y="32" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+				<OnClick>
+					ISale_Run()
+				</OnClick>
+			</Scripts>
+		</Button>
+		-->
+		<Button name="BigBrother_URL_frame_close" inherits="GameMenuButtonTemplate" text="Close">
+			<Anchors>
+				<Anchor point="CENTER" relativePoint="BOTTOMRIGHT">
+					<Offset>
+						<AbsDimension x="-100" y="32" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Scripts>
+				<OnClick>
+					this:GetParent():Hide();
+				</OnClick>
+			</Scripts>
+		</Button>
+		<EditBox name="BigBrother_URL_frame_textBox" autoFocus="false" multiLine="true">
+			<Size x="500" y="100" />
+			<Anchors>
+				<Anchor point="TOPLEFT">
+					<Offset x="15" y="-15" />
+				</Anchor>
+			</Anchors>
+			<Layers>
+			</Layers>
+			<Scripts>
+				<OnLoad>
+				</OnLoad>
+			</Scripts>
+			<FontString inherits="ChatFontNormal" />
+			<OnEscapePressed>
+				this:Hide();
+			</OnEscapePressed>
+		</EditBox>
+	 </Frames>
+	 
+	 
+   </Frame>
+</Ui>

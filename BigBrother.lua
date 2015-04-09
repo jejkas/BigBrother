@@ -9,14 +9,28 @@ BigBrother_ClassNumber["SHAMAN"] = 7;
 BigBrother_ClassNumber["WARLOCK"] = 9;
 BigBrother_ClassNumber["WARRIOR"] = 1; --- #1 class confirmed.
 
+BigBrother_ClassTalentLists = {}
+BigBrother_ClassTalentLists["DRUID"] = {};
+BigBrother_ClassTalentLists["HUNTER"] = {};
+BigBrother_ClassTalentLists["MAGE"] = {};
+BigBrother_ClassTalentLists["PALADIN"] = {};
+BigBrother_ClassTalentLists["PRIEST"] = {};
+BigBrother_ClassTalentLists["ROGUE"] = {};
+BigBrother_ClassTalentLists["SHAMAN"] = {};
+BigBrother_ClassTalentLists["WARLOCK"] = {};
+BigBrother_ClassTalentLists["WARRIOR"] = {};
+
+BigBrother_TalenData = {};
+
 function BigBrother_OnUpdate()
 end
+
+BigBrother_LastResponsSent = 0;
 
 function BigBrother_OnEvent()
 	if event == "ADDON_LOADED" and arg1 == "BigBrother"
 	then
-		--BigBrother_frame_url:SetText(BigBrother_GetTalentURL(BigBrother_GetTalentString()));
-		--BigBrother_frame:Show();
+		
 	end
 	
 	if event == "CHAT_MSG_ADDON"
@@ -25,9 +39,14 @@ function BigBrother_OnEvent()
 		if arg1 == "BigBrother_Talent_Request"
 		then
 			local requestName = arg2;
-			if UnitName("Player") == requestName
+			if UnitName("Player") == requestName or requestName == "all"
 			then
-				SendAddonMessage("BigBrother_Talent_Respond", arg4 .. "_" .. BigBrother_GetTalentString(), "GUILD");
+				if BigBrother_LastResponsSent + 2 < GetTime()
+				then
+					local playerClass, englishClass = UnitClass("player");
+					SendAddonMessage("BigBrother_Talent_Respond", englishClass .. "_" .. BigBrother_GetTalentString(), "GUILD");
+					BigBrother_LastResponsSent = GetTime();
+				end;
 			end;
 		end;
 		
@@ -35,17 +54,19 @@ function BigBrother_OnEvent()
 		then
 			local msg = arg2;
 			local split = __strsplit("_",msg);
-			local requestUser = split[1];
+			local requestClass = split[1];
 			local talentString = split[2];
 			local msgFromUser = arg4;
-			if UnitName("Player") == requestUser
+			
+			BigBrother_TalenData[msgFromUser] = {}
+			BigBrother_TalenData[msgFromUser]["class"] = requestClass;
+			BigBrother_TalenData[msgFromUser]["talent"] = talentString;
+			
+			if BigBrother_RequestList[msgFromUser] == true
 			then
-				if BigBrother_RequestList[msgFromUser] == true
-				then
-					BigBrother_frame_url:SetText(BigBrother_GetTalentURL(talentString));
-					BigBrother_frame:Show();
-					BigBrother_RequestList[msgFromUser] = false;
-				end;
+				BigBrother_URL_frame_textBox:SetText(BigBrother_GetTalentURL(talentString, requestClass));
+				BigBrother_URL_frame:Show();
+				BigBrother_RequestList[msgFromUser] = false;
 			end;
 		end;
 	end;
@@ -69,10 +90,9 @@ function BigBrother_GetTalentString()
 	return talentStr;
 end;
 
-function BigBrother_GetTalentURL(talentStr)
-	local playerClass, englishClass = UnitClass("player");
+function BigBrother_GetTalentURL(talentStr, class)
 	local 	url = "http://www.wowprovider.com/Old.aspx?talent=11215875_"; -- Core URL
-			url = url .. BigBrother_ClassNumber[englishClass]; -- Adding class number
+			url = url .. BigBrother_ClassNumber[class]; -- Adding class number
 			url = url .. "_8" .. talentStr; -- Not 100% sure here, but works on max level at least!
 	return url;
 end;
@@ -129,7 +149,6 @@ function BigBrother_(str)
 	end;
 end;
 
-
 function BigBrother_printArray(arr, n)
 	if n == nil
 	then
@@ -162,7 +181,6 @@ function BigBrother_printArray(arr, n)
 		end;
 	end
 end;
-
 
 function __strsplit(sep,str)
 	if str == nil

@@ -1,14 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	..\FrameXML\UI.xsd">
-	
-	<GameTooltip name="BigBrother_tooltip" frameStrata="TOOLTIP" hidden="true" inherits="GameTooltipTemplate">
-		<Scripts>
-			<OnLoad>
-				this:SetOwner(UIParent,"ANCHOR_NONE")
-			</OnLoad>
-		</Scripts> 
-	</GameTooltip>
-   <Frame name="BigBrother_frame" toplevel="true" enableMouse="true" hidden="true">
+   <Frame name="BigBrother_UI_frame" toplevel="true" enableMouse="true" hidden="true">
      <Size>
        <AbsDimension x="550" y="100" />
      </Size>
@@ -30,23 +22,7 @@
 	 
 	 
 	 <Frames>
-		<!--
-		<Button name="BigBrother_frame_run" inherits="GameMenuButtonTemplate" text="Run">
-			<Anchors>
-				<Anchor point="CENTER" relativePoint="BOTTOM">
-					<Offset>
-						<AbsDimension x="0" y="32" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Scripts>
-				<OnClick>
-					ISale_Run()
-				</OnClick>
-			</Scripts>
-		</Button>
-		-->
-		<Button name="BigBrother_frame_close" inherits="GameMenuButtonTemplate" text="Close">
+		<Button name="BigBrother_UI_frame_close" inherits="GameMenuButtonTemplate" text="Close">
 			<Anchors>
 				<Anchor point="CENTER" relativePoint="BOTTOMRIGHT">
 					<Offset>
@@ -60,7 +36,7 @@
 				</OnClick>
 			</Scripts>
 		</Button>
-		<EditBox name="BigBrother_frame_url" autoFocus="false" multiLine="true">
+		<EditBox name="BigBrother_UI_frame_url" autoFocus="false" multiLine="true">
 			<Size x="500" y="100" />
 			<Anchors>
 				<Anchor point="TOPLEFT">
