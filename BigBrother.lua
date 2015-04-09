@@ -15,8 +15,8 @@ end
 function BigBrother_OnEvent()
 	if event == "ADDON_LOADED" and arg1 == "BigBrother"
 	then
-		BigBrother_frame_url:SetText(BigBrother_GetTalentURL(BigBrother_GetTalentString()));
-		BigBrother_frame:Show();
+		--BigBrother_frame_url:SetText(BigBrother_GetTalentURL(BigBrother_GetTalentString()));
+		--BigBrother_frame:Show();
 	end
 	
 	if event == "CHAT_MSG_ADDON"
