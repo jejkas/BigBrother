@@ -1,61 +1,659 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 	..\FrameXML\UI.xsd">
-   <Frame name="BigBrother_UI_frame" toplevel="true" enableMouse="true" hidden="true">
-     <Size>
-       <AbsDimension x="550" y="100" />
-     </Size>
-     <Anchors>
-       <Anchor point="CENTER" />
-     </Anchors>
-     <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
-           edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-       <BackgroundInsets>
-         <AbsInset left="11" right="12" top="12" bottom="11"/>
-       </BackgroundInsets>
-       <TileSize>
-         <AbsValue val="32"/>
-       </TileSize>
-       <EdgeSize>
-         <AbsValue val="32"/>
-       </EdgeSize>
-     </Backdrop>
-	 
-	 
-	 <Frames>
-		<Button name="BigBrother_UI_frame_close" inherits="GameMenuButtonTemplate" text="Close">
-			<Anchors>
-				<Anchor point="CENTER" relativePoint="BOTTOMRIGHT">
-					<Offset>
-						<AbsDimension x="-100" y="32" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Scripts>
-				<OnClick>
-					this:GetParent():Hide();
-				</OnClick>
-			</Scripts>
-		</Button>
-		<EditBox name="BigBrother_UI_frame_url" autoFocus="false" multiLine="true">
-			<Size x="500" y="100" />
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset x="15" y="-15" />
-				</Anchor>
-			</Anchors>
-			<Layers>
-			</Layers>
-			<Scripts>
-				<OnLoad>
-				</OnLoad>
-			</Scripts>
-			<FontString inherits="ChatFontNormal" />
-			<OnEscapePressed>
-				this:Hide();
-			</OnEscapePressed>
-		</EditBox>
-	 </Frames>
-	 
-	 
+	
+    <Frame name="BigBrother_AutorollListItemTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="290" y="18"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Highlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+			<Texture name="$parentHighlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_Text" inherits="GameFontNormal" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="17" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Size>
+						<AbsDimension x="180" y="18" />
+					</Size>
+					<Scripts>
+						<OnClick>
+						</OnClick>
+					</Scripts>
+				</FontString>
+				
+				<FontString name="$parent_TalentText" inherits="GameFontNormal" justifyH="LEFT" text="0/0/0">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="120" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Size>
+						<AbsDimension x="180" y="18" />
+					</Size>
+					<Scripts>
+						<OnClick>
+						</OnClick>
+					</Scripts>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<EditBox name="$parent_Talent" inherits="InputBoxTemplate" autoFocus="false">
+				<Size>
+					<AbsDimension x="70" y="18" />
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEnterPressed>
+						this:SetText(
+							BigBrother_GetTalentURL(
+								BigBrother_Database[this:GetParent().username]["Talent"]["talent"],
+								BigBrother_Database[this:GetParent().username]["Talent"]["class"]
+							)
+						);
+					</OnEnterPressed>
+				</Scripts>
+			</EditBox>
+			<Button name="$parent_Inventory" inherits="GameMenuButtonTemplate" text="Inv">
+				<Size>
+					<AbsDimension x="30" y="18"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-80" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						BigBrother_UI_InventoryUsername = this:GetParent().username;
+						BigBrother_UI_ItemList_ApplyFilter();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+	
+	
+	<Frame name="BigBrother_UI_ItemListTemplate" virtual="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="220" y="18"/>
+		</Size>
+		<Scripts>
+			<OnEnter>
+				GameTooltip:SetOwner(this, "LEFT");
+				GameTooltip:SetHyperlink("item:"..this.itemString);
+				GameTooltip:Show();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Highlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+			<Texture name="$parentHighlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_Text" inherits="GameFontNormal" justifyH="LEFT" text="ITEM">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="30" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Size>
+						<AbsDimension x="180" y="18" />
+					</Size>
+				</FontString>
+				<FontString name="$parent_Amount" inherits="GameFontNormal" justifyH="LEFT" text="100x ">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Size>
+						<AbsDimension x="30" y="18" />
+					</Size>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+	
+	
+	
+	<Frame name="BigBrother_UI_frame" toplevel="true" enableMouse="true" hidden="true">
+		<Size>
+			<AbsDimension x="600" y="400" />
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" />
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11"/>
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32"/>
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32"/>
+			</EdgeSize>
+		</Backdrop>
+		<Frames>
+			<Button name="BigBrother_UI_frame_close" inherits="GameMenuButtonTemplate" text="x">
+				<Size>
+					<AbsDimension x="15" y="15"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-15" y="-15" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						this:GetParent():Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			
+			
+			
+			<Frame name="$parent_AutorollListHeader">
+				<Size>
+					<AbsDimension x="290" y="95"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="15" y="-15"/>
+						</Offset>
+					</Anchor>
+				</Anchors>				
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString inherits="GameFontHighlight" text="BigBrother - Just taking a look.">
+							<Anchors>
+								<Anchor point="TOPLEFT" />
+							</Anchors>
+						</FontString>
+						<FontString name="$parent_NameLabel" inherits="GameFontNormal" text="Name:">
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="-25" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="$parent_NameLabelRight" inherits="GameFontNormal" text="Name:">
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="325" y="-25" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				
+				<Frames>
+					<EditBox name="$parent_Filter" inherits="InputBoxTemplate" autoFocus="false">
+						<Size>
+							<AbsDimension x="100" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent_NameLabel" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="30" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnEnterPressed>
+								BigBrother_UI_UserList_ApplyFilter();
+							</OnEnterPressed>
+						</Scripts>
+					</EditBox>
+					
+					<Button name="$parent_UnitList_ClassFilter" inherits="UIDropDownMenuTemplate">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent_NameLabel" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="200" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnShow>
+								this:SetScale(0.8)
+							</OnShow>
+						</Scripts>
+					</Button>
+					
+					
+					<EditBox name="$parent_UsernameSearch" inherits="InputBoxTemplate" autoFocus="false">
+						<Size>
+							<AbsDimension x="80" y="20" />
+						</Size>
+						<Anchors>
+						<Anchor point="LEFT" relativeTo="$parent_NameLabel" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="245" y="22" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnEnterPressed>
+								BigBrother_RequestTalentsFrom(this:GetText());
+							</OnEnterPressed>
+						</Scripts>
+					</EditBox>
+					
+					
+					<Button name="$parent_ScanTarget" inherits="GameMenuButtonTemplate" text="Scan Target">
+						<Size>
+							<AbsDimension x="100" y="20"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="180" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								BigBrother_RequestTalentsUnit("target")
+							</OnClick>
+						</Scripts>
+					</Button>
+					
+					
+					<EditBox name="$parent_FilterInventory" inherits="InputBoxTemplate" autoFocus="false">
+						<Size>
+							<AbsDimension x="190" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="$parent_NameLabel" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="340" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnEnterPressed>
+								BigBrother_UI_ItemList_ApplyFilter();
+							</OnEnterPressed>
+						</Scripts>
+					</EditBox>
+				</Frames>
+			</Frame>
+			
+			
+			
+			<!-- PLAYER LIST -->
+			<Frame name="$parent_AutorollList">
+				<Size>
+					<AbsDimension x="320" y="190"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_AutorollListHeader" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-45"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" bgFile="Interface\DialogFrame\UI-DialogBox-Background">
+					<EdgeSize>
+						<AbsValue val="16"/>
+					</EdgeSize>
+					<BackgroundInsets>
+						<AbsInset left="5" right="5" top="5" bottom="5"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parent_Info" inherits="GameFontNormal">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="5" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Frame name="$parent_Item1" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="5" y="-5" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item2" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item1" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item3" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item2" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item4" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item3" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item5" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item4" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item6" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item5" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item7" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item6" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item8" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item7" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item9" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item8" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item10" inherits="BigBrother_AutorollListItemTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item9" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<ScrollFrame name="$parent_ScrollBar" inherits="FauxScrollFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-8"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="-30" y="8"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnVerticalScroll>
+								FauxScrollFrame_OnVerticalScroll(18, BigBrother_UI_UserList_Render);
+							</OnVerticalScroll>
+							<OnShow>
+								
+							</OnShow>
+						</Scripts>
+					</ScrollFrame>
+				</Frames>
+			</Frame>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<!-- Inventory LIST -->
+			<Frame name="$parent_InventoryList">
+				<Size>
+					<AbsDimension x="250" y="190"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_AutorollListHeader" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="320" y="-45"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" bgFile="Interface\DialogFrame\UI-DialogBox-Background">
+					<EdgeSize>
+						<AbsValue val="16"/>
+					</EdgeSize>
+					<BackgroundInsets>
+						<AbsInset left="5" right="5" top="5" bottom="5"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parent_Info" inherits="GameFontNormal">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="5" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Frame name="$parent_Item1" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="5" y="-5" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item2" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item1" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item3" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item2" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item4" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item3" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item5" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item4" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item6" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item5" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item7" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item6" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item8" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item7" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item9" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item8" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<Frame name="$parent_Item10" inherits="BigBrother_UI_ItemListTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parent_Item9" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+					<ScrollFrame name="$parent_ScrollBar" inherits="FauxScrollFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-8"/>
+								</Offset>
+							</Anchor>
+							<Anchor point="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="-30" y="8"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnVerticalScroll>
+								FauxScrollFrame_OnVerticalScroll(18, BigBrother_UI_ItemList_Render);
+							</OnVerticalScroll>
+							<OnShow>
+								
+							</OnShow>
+						</Scripts>
+					</ScrollFrame>
+				</Frames>
+			</Frame>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+		</Frames>
    </Frame>
 </Ui>
