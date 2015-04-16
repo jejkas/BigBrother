@@ -101,13 +101,9 @@ function BigBrother_OnEvent()
 			local requestName = arg2;
 			if UnitName("Player") == requestName --or requestName == "all" -- All might be a bit laggy.
 			then
-				if BigBrother_LastResponsSent + 2 < GetTime()
-				then
-					local playerClass, englishClass = UnitClass("player");
-					local talString, shortTalent = BigBrother_GetTalentString();
-					BigBrother_SendAddonMessage("BigBrother_Talent_Respond", englishClass .. "_" .. talString .. "_" .. shortTalent, "GUILD");
-					BigBrother_LastResponsSent = GetTime();
-				end;
+				local playerClass, englishClass = UnitClass("player");
+				local talString, shortTalent = BigBrother_GetTalentString();
+				BigBrother_SendAddonMessage("BigBrother_Talent_Respond", englishClass .. "_" .. talString .. "_" .. shortTalent, "GUILD");
 			end;
 		end;
 		
@@ -129,13 +125,7 @@ function BigBrother_OnEvent()
 			BigBrother_Database[senderUsername]["Talent"]["class"] = requestClass;
 			BigBrother_Database[senderUsername]["Talent"]["talent"] = talentString;
 			BigBrother_Database[senderUsername]["Talent"]["shortTalent"] = shortTalent;
-			
-			if BigBrother_RequestList[senderUsername] == true
-			then
-				BigBrother_URL_frame_textBox:SetText(BigBrother_GetTalentURL(talentString, requestClass));
-				BigBrother_URL_frame:Show();
-				BigBrother_RequestList[senderUsername] = false;
-			end;
+			BigBrother_UI_UserList_ApplyFilter();
 		end;
 		
 		
@@ -154,17 +144,14 @@ function BigBrother_OnEvent()
 			local requestName = arg2;
 			if UnitName("Player") == requestName --or requestName == "all" -- All might be a bit laggy.
 			then
-				if BigBrother_LastResponsSent + 2 < GetTime()
-				then
-					local playerClass, englishClass = UnitClass("player");
-					local d = BigBrother_MakeInventoryStrings(BigBrother_GetInventory());
-					for k,v in pairs(d)
-					do
-						--BigBrother_(d[k]);
-						BigBrother_SendAddonMessage("BigBrother_Inventory_Respond", d[k], "GUILD");
-					end;
-					BigBrother_LastResponsSent = GetTime();
+				local playerClass, englishClass = UnitClass("player");
+				local d = BigBrother_MakeInventoryStrings(BigBrother_GetInventory());
+				for k,v in pairs(d)
+				do
+					--BigBrother_(d[k]);
+					BigBrother_SendAddonMessage("BigBrother_Inventory_Respond", d[k], "GUILD");
 				end;
+				BigBrother_LastResponsSent = GetTime();
 			end;
 		end;
 		
@@ -251,51 +238,54 @@ end;
 BigBrother_RequestList = {};
 BigBrother_LastRequest = 0;
 
+function BigBrother_RequestDataFrom(username)
+	if BigBrother_LastRequest + 0.1 < GetTime()
+	then
+		BigBrother_RequestTalentsFrom(username);
+		BigBrother_RequestInventoryFrom(username);
+		BigBrother_LastRequest = GetTime();
+	end;
+end;
+
+
 --/script BigBrother_RequestTalentsFrom("Rexwarrior")
 function BigBrother_RequestTalentsFrom(username)
-	-- Anti spam, only once per 2 sec.
-	if BigBrother_LastRequest + 0.3 < GetTime()
+	local messageChannel = nil;
+	
+	if BigBrother_UserInGuild(username)
 	then
-		local messageChannel = nil;
-		
-		if BigBrother_UserInGuild(username)
-		then
-			BigBrother_SendAddonMessage("BigBrother_Talent_Request", username, "GUILD");
-			return true;
-		end;
-		
-		if BigBrother_UserInRaid(username)
-		then
-			BigBrother_SendAddonMessage("BigBrother_Talent_Request", username, "RAID");
-			return true;
-		end;
-		
-		return false;
-	end
+		BigBrother_SendAddonMessage("BigBrother_Talent_Request", username, "GUILD");
+		return true;
+	end;
+	
+	if BigBrother_UserInRaid(username)
+	then
+		BigBrother_SendAddonMessage("BigBrother_Talent_Request", username, "RAID");
+		return true;
+	end;
+	
+	return false;
 end;
 
 function BigBrother_RequestTalentsUnit(unit)
 	-- Anti spam, only once per 2 sec.
-	if BigBrother_LastRequest + 0.3 <= GetTime() and UnitExists(unit)
+	local messageChannel = nil;
+	
+	if UnitInRaid(unit) or UnitInParty(unit)
 	then
-		local messageChannel = nil;
-		
-		if UnitInRaid(unit) or UnitInParty(unit)
-		then
-			messageChannel = "RAID";
-		end;
-		
-		if GetGuildInfo(unit) == GetGuildInfo("player")
-		then
-			-- Keep data with in the guild.
-			messageChannel = "GUILD";
-		end;
-		
-		if messageChannel
-		then
-			BigBrother_SendAddonMessage("BigBrother_Talent_Request", UnitName(unit), messageChannel);
-		end;
-	end
+		messageChannel = "RAID";
+	end;
+	
+	if GetGuildInfo(unit) == GetGuildInfo("player")
+	then
+		-- Keep data with in the guild.
+		messageChannel = "GUILD";
+	end;
+	
+	if messageChannel
+	then
+		BigBrother_SendAddonMessage("BigBrother_Talent_Request", UnitName(unit), messageChannel);
+	end;
 end;
 
 function BigBrother_UserInRaid(username)
@@ -323,7 +313,7 @@ function BigBrother_UserInGuild(username)
 	while GetGuildRosterInfo(i) ~= nil
 	do
 		name, rank, rankIndex, level, class, zone, group, note, officernote, online = GetGuildRosterInfo(i);
-		if string.lower(name) == string.lower(username)
+		if name and string.lower(name) == string.lower(username)
 		then
 			return true;
 		end;
@@ -334,12 +324,22 @@ end;
 
 
 --/script BigBrother_RequestInventoryFrom("Rexwarrior")
-function BigBrother_RequestInventoryFrom(unitName)
-	-- Anti spam, only once per 2 sec.
-	if BigBrother_LastRequest + 2 < GetTime()
+function BigBrother_RequestInventoryFrom(username)
+	local messageChannel = nil;
+	
+	if BigBrother_UserInGuild(username)
 	then
-		BigBrother_SendAddonMessage("BigBrother_Inventory_Request", unitName, "GUILD");
-	end
+		BigBrother_SendAddonMessage("BigBrother_Inventory_Request", username, "GUILD");
+		return true;
+	end;
+	
+	if BigBrother_UserInRaid(username)
+	then
+		BigBrother_SendAddonMessage("BigBrother_Inventory_Request", username, "RAID");
+		return true;
+	end;
+	
+	return false;
 end;
 
 

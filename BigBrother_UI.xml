@@ -269,7 +269,7 @@
 						</Anchors>
 						<Scripts>
 							<OnEnterPressed>
-								BigBrother_RequestTalentsFrom(this:GetText());
+								BigBrother_RequestDataFrom(this:GetText());
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
@@ -288,7 +288,7 @@
 						</Anchors>
 						<Scripts>
 							<OnClick>
-								BigBrother_RequestTalentsUnit("target")
+								BigBrother_RequestDataFrom(UnitName("target"))
 							</OnClick>
 						</Scripts>
 					</Button>
